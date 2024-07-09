@@ -1,35 +1,45 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import YouTube from "react-youtube";
+import "./App.css";
 
-function App() {
-  const [count, setCount] = useState(0)
+const App = () => {
+  const [track, setTrack] = useState(null);
+
+  useEffect(() => {
+    axios
+      .get("/api/getSongOfTheDay")
+      .then((response) => setTrack(response.data))
+      .catch((error) => console.error("Error fetching song data:", error));
+  }, []);
 
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <div
+      className="flex items-center justify-center h-screen bg-cover"
+      style={{ backgroundImage: `url(${track?.albumArtBlurred})` }}
+    >
+      {track && (
+        <div className="text-center">
+          <img
+            src={track.albumArt}
+            alt={track.title}
+            className="mx-auto mb-4"
+          />
+          <YouTube
+            videoId={track.videoId}
+            opts={{ playerVars: { autoplay: 1 } }}
+          />
+          <div className="controls mt-4">
+            <button>Play</button>
+            <button>Pause</button>
+            <button onClick={() => alert(`More info about ${track.artist}`)}>
+              Info
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
-export default App
+export default App;
