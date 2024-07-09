@@ -1,13 +1,20 @@
 const express = require("express");
 const axios = require("axios");
 const path = require("path");
+const { google } = require("googleapis");
 require("dotenv").config();
 
 const app = express();
 const PORT = process.env.PORT || 4000;
 
 const DISCOGS_API_URL = "https://api.discogs.com/";
-const { DISCOGS_CONSUMER_KEY, DISCOGS_CONSUMER_SECRET } = process.env;
+const { DISCOGS_CONSUMER_KEY, DISCOGS_CONSUMER_SECRET, YOUTUBE_API_KEY } =
+  process.env;
+
+const youtube = google.youtube({
+  version: "v3",
+  auth: YOUTUBE_API_KEY,
+});
 
 // Function to get a random track from the results
 const getRandomTrack = (tracks) => {
@@ -36,6 +43,21 @@ const searchHipHopTracks = async () => {
   }
 };
 
+// Function to search for a YouTube video
+const searchYouTubeVideo = async (query) => {
+  try {
+    const response = await youtube.search.list({
+      part: "snippet",
+      q: query,
+      maxResults: 1,
+    });
+    return response.data.items[0];
+  } catch (error) {
+    console.error("Error searching YouTube API:", error);
+    throw error;
+  }
+};
+
 // Endpoint to get the track of the day
 app.get("/api/getSongOfTheDay", async (req, res) => {
   try {
@@ -51,12 +73,15 @@ app.get("/api/getSongOfTheDay", async (req, res) => {
     });
 
     const trackDetails = trackDetailsResponse.data;
+    const query = `${trackDetails.title} ${trackDetails.artists_sort}`;
+    const video = await searchYouTubeVideo(query);
 
     res.json({
       title: trackDetails.title,
       artist: trackDetails.artists_sort,
       albumArt: trackDetails.images ? trackDetails.images[0].uri : null,
       albumArtBlurred: trackDetails.images ? trackDetails.images[0].uri : null,
+      videoId: video.id.videoId,
       resourceUrl: trackDetails.resource_url,
     });
   } catch (error) {
