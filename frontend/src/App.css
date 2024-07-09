@@ -2,15 +2,67 @@
 @tailwind components;
 @tailwind utilities;
 
-.controls button {
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* To remove scrollbars */
+}
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+}
+
+.error-message {
+  color: red;
+  font-size: 1.2em;
+  margin-bottom: 1em;
+}
+
+.controls {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.control-button {
   background: rgba(0, 0, 0, 0.5);
   color: white;
   border: none;
   padding: 0.5rem 1rem;
   margin: 0 0.5rem;
   cursor: pointer;
+  transition: background 0.3s ease;
 }
 
-.controls button:hover {
+.control-button:hover {
   background: rgba(0, 0, 0, 0.7);
+}
+
+.background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  filter: blur(10px);
+  z-index: -1;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+}
+
+.video-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }

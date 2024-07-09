@@ -80,7 +80,6 @@ app.get("/api/getSongOfTheDay", async (req, res) => {
     const tracks = await searchHipHopTracks();
     const trackOfTheDay = getRandomTrack(tracks);
 
-    // Fetch detailed information about the selected track
     const trackDetailsResponse = await axios.get(trackOfTheDay.resource_url, {
       params: {
         key: DISCOGS_CONSUMER_KEY,
@@ -104,6 +103,7 @@ app.get("/api/getSongOfTheDay", async (req, res) => {
     cachedTrack = result;
     cacheTimestamp = now;
 
+    console.log("Track of the Day:", result); // Add this line to log the result
     res.json(result);
   } catch (error) {
     console.error("Error in getSongOfTheDay:", error);

@@ -10,41 +10,78 @@ const App = () => {
   useEffect(() => {
     axios
       .get("/api/getSongOfTheDay")
-      .then((response) => setTrack(response.data))
+      .then((response) => {
+        console.log("API Response:", response.data);
+        setTrack(response.data);
+      })
       .catch((error) => {
         console.error("Error fetching song data:", error);
         setError("Error fetching song data. Please try again later.");
       });
   }, []);
 
+  const opts = {
+    height: "390",
+    width: "640",
+    playerVars: {
+      autoplay: 1,
+      controls: 0, // Hide YouTube controls
+      enablejsapi: 1,
+    },
+  };
+
   return (
-    <div
-      className="flex items-center justify-center h-screen bg-cover"
-      style={{ backgroundImage: `url(${track?.albumArtBlurred})` }}
-    >
+    <div className="content">
       {error && <div className="error-message">{error}</div>}
       {track && !error && (
-        <div className="text-center">
-          <img
-            src={track.albumArt}
-            alt={track.title}
-            className="mx-auto mb-4"
-          />
-          <YouTube
-            videoId={track.videoId}
-            opts={{ playerVars: { autoplay: 1 } }}
-            onError={(e) =>
-              setError("Error playing video. Please try again later.")
-            }
-          />
-          <div className="controls mt-4">
-            <button>Play</button>
-            <button>Pause</button>
-            <button onClick={() => alert(`More info about ${track.artist}`)}>
-              Info
-            </button>
+        <>
+          <div
+            className="background"
+            style={{ backgroundImage: `url(${track.albumArtBlurred})` }}
+          ></div>
+          <div className="video-container">
+            <img
+              src={track.albumArt}
+              alt={track.title}
+              className="mx-auto mb-4"
+            />
+            <YouTube videoId={track.videoId} opts={opts} />
+            <div className="controls mt-4">
+              <button
+                onClick={() =>
+                  document
+                    .querySelector("iframe")
+                    .contentWindow.postMessage(
+                      '{"event":"command","func":"playVideo","args":""}',
+                      "*"
+                    )
+                }
+                className="control-button"
+              >
+                Play
+              </button>
+              <button
+                onClick={() =>
+                  document
+                    .querySelector("iframe")
+                    .contentWindow.postMessage(
+                      '{"event":"command","func":"pauseVideo","args":""}',
+                      "*"
+                    )
+                }
+                className="control-button"
+              >
+                Pause
+              </button>
+              <button
+                onClick={() => alert(`More info about ${track.artist}`)}
+                className="control-button"
+              >
+                Info
+              </button>
+            </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   );
