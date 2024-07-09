@@ -5,12 +5,16 @@ import "./App.css";
 
 const App = () => {
   const [track, setTrack] = useState(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     axios
       .get("/api/getSongOfTheDay")
       .then((response) => setTrack(response.data))
-      .catch((error) => console.error("Error fetching song data:", error));
+      .catch((error) => {
+        console.error("Error fetching song data:", error);
+        setError("Error fetching song data. Please try again later.");
+      });
   }, []);
 
   return (
@@ -18,7 +22,8 @@ const App = () => {
       className="flex items-center justify-center h-screen bg-cover"
       style={{ backgroundImage: `url(${track?.albumArtBlurred})` }}
     >
-      {track && (
+      {error && <div className="error-message">{error}</div>}
+      {track && !error && (
         <div className="text-center">
           <img
             src={track.albumArt}
@@ -28,6 +33,9 @@ const App = () => {
           <YouTube
             videoId={track.videoId}
             opts={{ playerVars: { autoplay: 1 } }}
+            onError={(e) =>
+              setError("Error playing video. Please try again later.")
+            }
           />
           <div className="controls mt-4">
             <button>Play</button>
