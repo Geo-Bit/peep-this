@@ -16,6 +16,10 @@ const youtube = google.youtube({
   auth: YOUTUBE_API_KEY,
 });
 
+let cachedTrack = null;
+let cacheTimestamp = null;
+const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
+
 // Function to get a random track from the results
 const getRandomTrack = (tracks) => {
   const randomIndex = Math.floor(Math.random() * tracks.length);
@@ -32,8 +36,8 @@ const searchHipHopTracks = async () => {
         genre: "Hip Hop",
         year: "1980-1999",
         type: "release",
-        per_page: 100, // Number of results per page (max is 100)
-        page: 1, // You can implement pagination if needed
+        per_page: 100,
+        page: 1,
       },
     });
     return response.data.results;
@@ -64,6 +68,15 @@ const searchYouTubeVideo = async (query) => {
 // Endpoint to get the track of the day
 app.get("/api/getSongOfTheDay", async (req, res) => {
   try {
+    const now = Date.now();
+    if (
+      cachedTrack &&
+      cacheTimestamp &&
+      now - cacheTimestamp < CACHE_DURATION
+    ) {
+      return res.json(cachedTrack);
+    }
+
     const tracks = await searchHipHopTracks();
     const trackOfTheDay = getRandomTrack(tracks);
 
@@ -79,14 +92,19 @@ app.get("/api/getSongOfTheDay", async (req, res) => {
     const query = `${trackDetails.title} ${trackDetails.artists_sort}`;
     const video = await searchYouTubeVideo(query);
 
-    res.json({
+    const result = {
       title: trackDetails.title,
       artist: trackDetails.artists_sort,
       albumArt: trackDetails.images ? trackDetails.images[0].uri : null,
       albumArtBlurred: trackDetails.images ? trackDetails.images[0].uri : null,
       videoId: video.id.videoId,
       resourceUrl: trackDetails.resource_url,
-    });
+    };
+
+    cachedTrack = result;
+    cacheTimestamp = now;
+
+    res.json(result);
   } catch (error) {
     console.error("Error in getSongOfTheDay:", error);
     res.status(500).send("Error fetching song data");
@@ -94,11 +112,11 @@ app.get("/api/getSongOfTheDay", async (req, res) => {
 });
 
 // Serve static files from the React frontend app
-app.use(express.static(path.join(__dirname, "..", "frontend", "dist")));
+app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
 // Serve the React frontend app
 app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "..", "frontend", "dist", "index.html"));
+  res.sendFile(path.join(__dirname, "../frontend/dist", "index.html"));
 });
 
 app.listen(PORT, () => {
