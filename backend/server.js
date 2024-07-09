@@ -2,18 +2,27 @@ const express = require("express");
 const axios = require("axios");
 const path = require("path");
 const { google } = require("googleapis");
+const OpenAI = require("openai");
 require("dotenv").config();
 
 const app = express();
 const PORT = process.env.PORT || 4000;
 
 const DISCOGS_API_URL = "https://api.discogs.com/";
-const { DISCOGS_CONSUMER_KEY, DISCOGS_CONSUMER_SECRET, YOUTUBE_API_KEY } =
-  process.env;
+const {
+  DISCOGS_CONSUMER_KEY,
+  DISCOGS_CONSUMER_SECRET,
+  YOUTUBE_API_KEY,
+  OPENAI_API_KEY,
+} = process.env;
 
 const youtube = google.youtube({
   version: "v3",
   auth: YOUTUBE_API_KEY,
+});
+
+const openai = new OpenAI({
+  apiKey: OPENAI_API_KEY,
 });
 
 let cachedTrack = null;
@@ -65,6 +74,45 @@ const searchYouTubeVideo = async (query) => {
   }
 };
 
+// Function to generate description using OpenAI
+const generateDescription = async (artist, album, track) => {
+  try {
+    const messages = [
+      {
+        role: "system",
+        content:
+          "You are a helpful assistant that provides detailed and interesting descriptions for music.",
+      },
+      {
+        role: "user",
+        content: `Provide a detailed and interesting description for the following:\n\nArtist: ${artist}\nAlbum: ${album}\nTrack: ${track}`,
+      },
+    ];
+    const response = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: messages,
+      max_tokens: 150,
+    });
+    return response.choices[0].message.content.trim();
+  } catch (error) {
+    if (error.response) {
+      if (error.response.status === 429) {
+        console.error(
+          "Error generating description with OpenAI: Quota exceeded."
+        );
+      } else {
+        console.error(
+          "Error generating description with OpenAI:",
+          error.response.data
+        );
+      }
+    } else {
+      console.error("Error generating description with OpenAI:", error.message);
+    }
+    throw error;
+  }
+};
+
 // Endpoint to get the track of the day
 app.get("/api/getSongOfTheDay", async (req, res) => {
   try {
@@ -91,6 +139,12 @@ app.get("/api/getSongOfTheDay", async (req, res) => {
     const query = `${trackDetails.title} ${trackDetails.artists_sort}`;
     const video = await searchYouTubeVideo(query);
 
+    const description = await generateDescription(
+      trackDetails.artists_sort,
+      trackDetails.title,
+      trackDetails.title
+    );
+
     const result = {
       title: trackDetails.title,
       artist: trackDetails.artists_sort,
@@ -98,15 +152,15 @@ app.get("/api/getSongOfTheDay", async (req, res) => {
       albumArtBlurred: trackDetails.images ? trackDetails.images[0].uri : null,
       videoId: video.id.videoId,
       resourceUrl: trackDetails.resource_url,
+      description: description,
     };
 
     cachedTrack = result;
     cacheTimestamp = now;
 
-    console.log("Track of the Day:", result); // Add this line to log the result
+    console.log("Track of the Day:", result);
     res.json(result);
   } catch (error) {
-    console.error("Error in getSongOfTheDay:", error);
     res.status(500).send("Error fetching song data");
   }
 });

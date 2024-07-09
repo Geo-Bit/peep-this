@@ -6,6 +6,7 @@ import "./App.css";
 const App = () => {
   const [track, setTrack] = useState(null);
   const [error, setError] = useState(null);
+  const [showInfo, setShowInfo] = useState(false);
 
   useEffect(() => {
     axios
@@ -74,12 +75,33 @@ const App = () => {
                 Pause
               </button>
               <button
-                onClick={() => alert(`More info about ${track.artist}`)}
+                onClick={() => setShowInfo(!showInfo)}
                 className="control-button"
               >
                 Info
               </button>
             </div>
+            {showInfo && (
+              <div className="info-box">
+                <h3>{track.title}</h3>
+                <p>
+                  <strong>Artist:</strong> {track.artist}
+                </p>
+                <p>
+                  <strong>Description:</strong> {track.description}
+                </p>
+                <p>
+                  <strong>Resource URL:</strong>{" "}
+                  <a
+                    href={track.resourceUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    More Info
+                  </a>
+                </p>
+              </div>
+            )}
           </div>
         </>
       )}
