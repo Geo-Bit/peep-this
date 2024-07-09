@@ -51,6 +51,9 @@ const searchYouTubeVideo = async (query) => {
       q: query,
       maxResults: 1,
     });
+    if (response.data.items.length === 0) {
+      throw new Error("No video found for the query.");
+    }
     return response.data.items[0];
   } catch (error) {
     console.error("Error searching YouTube API:", error);
@@ -85,6 +88,7 @@ app.get("/api/getSongOfTheDay", async (req, res) => {
       resourceUrl: trackDetails.resource_url,
     });
   } catch (error) {
+    console.error("Error in getSongOfTheDay:", error);
     res.status(500).send("Error fetching song data");
   }
 });
