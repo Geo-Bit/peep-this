@@ -116,18 +116,9 @@ const generateDescription = async (artist, album, track) => {
   }
 };
 
-// Endpoint to get the track of the day
-app.get("/api/getSongOfTheDay", async (req, res) => {
-  try {
-    const now = Date.now();
-    if (
-      cachedTrack &&
-      cacheTimestamp &&
-      now - cacheTimestamp < CACHE_DURATION
-    ) {
-      return res.json(cachedTrack);
-    }
-
+const fetchValidTrack = async () => {
+  let validTrack = null;
+  while (!validTrack) {
     const tracks = await searchHipHopTracks();
     const trackOfTheDay = getRandomTrack(tracks);
 
@@ -140,35 +131,56 @@ app.get("/api/getSongOfTheDay", async (req, res) => {
 
     const trackDetails = trackDetailsResponse.data;
     const query = `${trackDetails.title} ${trackDetails.artists_sort}`;
-    const video = await searchYouTubeVideo(query);
 
-    const description = await generateDescription(
-      trackDetails.artists_sort,
-      trackDetails.title,
-      trackDetails.title
-    );
+    try {
+      const video = await searchYouTubeVideo(query);
 
-    // Fetch larger album art if available
-    const albumArt = trackDetails.images
-      ? trackDetails.images.find((img) => img.type === "primary")
-      : null;
-    const albumArtUrl = albumArt ? albumArt.uri : null;
+      if (
+        trackDetails.images &&
+        trackDetails.images.length > 0 &&
+        video.id.videoId
+      ) {
+        const description = await generateDescription(
+          trackDetails.artists_sort,
+          trackDetails.title,
+          trackDetails.title
+        );
 
-    const result = {
-      title: trackDetails.title,
-      artist: trackDetails.artists_sort,
-      albumArt: albumArtUrl,
-      albumArtBlurred: albumArtUrl,
-      videoId: video.id.videoId,
-      discogsUrl: trackDetails.uri,
-      description: description,
-    };
+        validTrack = {
+          title: trackDetails.title,
+          artist: trackDetails.artists_sort,
+          albumArt: trackDetails.images[0].uri,
+          albumArtBlurred: trackDetails.images[0].uri,
+          videoId: video.id.videoId,
+          resourceUrl: trackDetails.uri, // Using the correct URL
+          description: description,
+        };
+      }
+    } catch (error) {
+      console.error("Error finding a valid track, retrying...", error.message);
+    }
+  }
+  return validTrack;
+};
 
-    cachedTrack = result;
+// Endpoint to get the track of the day
+app.get("/api/getSongOfTheDay", async (req, res) => {
+  try {
+    const now = Date.now();
+    if (
+      cachedTrack &&
+      cacheTimestamp &&
+      now - cacheTimestamp < CACHE_DURATION
+    ) {
+      return res.json(cachedTrack);
+    }
+
+    const validTrack = await fetchValidTrack();
+    cachedTrack = validTrack;
     cacheTimestamp = now;
 
-    console.log("Track of the Day:", result);
-    res.json(result);
+    console.log("Track of the Day:", validTrack);
+    res.json(validTrack);
   } catch (error) {
     res.status(500).send("Error fetching song data");
   }
