@@ -70,18 +70,27 @@ html, body, #root {
 }
 
 .nav-button {
-  background: rgba(0, 0, 0, 0.5);
-  color: white;
   border: none;
-  padding: 0.5rem 1rem;
+  padding: 0.5rem;
   cursor: pointer;
-  transition: background 0.3s ease;
+  transition: transform 0.3s ease;
   text-decoration: none;
   text-align: center;
 }
 
 .nav-button:hover {
-  background: rgba(0, 0, 0, 0.7);
+  transform: scale(1.1);
+}
+
+.nav-button img,
+.nav-button svg {
+  width: 40px;
+  height: 40px;
+  fill: white; /* Make icons white */
+}
+
+.nav-button img {
+  filter: invert(100%);
 }
 
 .info-box {
@@ -90,7 +99,7 @@ html, body, #root {
   padding: 1rem;
   margin-top: 1rem;
   border-radius: 8px;
-  max-width: 80%;
+  max-width: 40%; /* Set max-width for desktop */
   text-align: left;
 }
 
@@ -110,6 +119,6 @@ html, body, #root {
     max-width: 300px;
   }
   .info-box {
-    max-width: 90%;
+    max-width: 90%; /* Remove max-width constraint for mobile */
   }
 }

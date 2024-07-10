@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "./App.css";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faYoutube } from "@fortawesome/free-brands-svg-icons";
+import DiscogsIcon from "./icons/discogs.svg";
 
 const App = () => {
   const [track, setTrack] = useState(null);
@@ -42,15 +45,23 @@ const App = () => {
                   rel="noopener noreferrer"
                   className="nav-button"
                 >
-                  Listen on YouTube
+                  <FontAwesomeIcon
+                    icon={faYoutube}
+                    size="2x"
+                    style={{ color: "white" }}
+                  />
                 </a>
                 <a
-                  href={track.resourceUrl}
+                  href={track.discogsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="nav-button"
                 >
-                  View on Discogs
+                  <img
+                    src={DiscogsIcon}
+                    alt="Discogs"
+                    className="discogs-icon"
+                  />
                 </a>
               </div>
             </div>

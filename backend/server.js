@@ -160,7 +160,7 @@ app.get("/api/getSongOfTheDay", async (req, res) => {
       albumArt: albumArtUrl,
       albumArtBlurred: albumArtUrl,
       videoId: video.id.videoId,
-      resourceUrl: trackDetails.resource_url,
+      discogsUrl: trackDetails.uri,
       description: description,
     };
 
