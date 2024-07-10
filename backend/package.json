@@ -15,6 +15,7 @@
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "googleapis": "^140.0.1",
-    "openai": "^4.52.4"
+    "openai": "^4.52.4",
+    "spotify-web-api-node": "^5.0.2"
   }
 }

@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import "./App.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faYoutube } from "@fortawesome/free-brands-svg-icons";
-import DiscogsIcon from "./icons/discogs.svg";
+import { faYoutube, faSpotify } from "@fortawesome/free-brands-svg-icons";
+import DiscogsIcon from "./icons/discogs.svg"; // Make sure the path is correct
+import "./App.css";
 
 const App = () => {
   const [track, setTrack] = useState(null);
@@ -57,10 +57,18 @@ const App = () => {
                   rel="noopener noreferrer"
                   className="nav-button"
                 >
-                  <img
-                    src={DiscogsIcon}
-                    alt="Discogs"
-                    className="discogs-icon"
+                  <img src={DiscogsIcon} alt="Discogs" />
+                </a>
+                <a
+                  href={track.spotifyUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="nav-button"
+                >
+                  <FontAwesomeIcon
+                    icon={faSpotify}
+                    size="2x"
+                    style={{ color: "white" }}
                   />
                 </a>
               </div>

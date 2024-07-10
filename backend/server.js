@@ -4,6 +4,7 @@ const path = require("path");
 const { google } = require("googleapis");
 const OpenAI = require("openai");
 const cors = require("cors");
+const SpotifyWebApi = require("spotify-web-api-node");
 require("dotenv").config();
 
 const app = express();
@@ -17,6 +18,8 @@ const {
   DISCOGS_CONSUMER_SECRET,
   YOUTUBE_API_KEY,
   OPENAI_API_KEY,
+  SPOTIFY_CLIENT_ID,
+  SPOTIFY_CLIENT_SECRET,
 } = process.env;
 
 const youtube = google.youtube({
@@ -27,6 +30,21 @@ const youtube = google.youtube({
 const openai = new OpenAI({
   apiKey: OPENAI_API_KEY,
 });
+
+const spotifyApi = new SpotifyWebApi({
+  clientId: SPOTIFY_CLIENT_ID,
+  clientSecret: SPOTIFY_CLIENT_SECRET,
+});
+
+// Retrieve an access token.
+spotifyApi.clientCredentialsGrant().then(
+  function (data) {
+    spotifyApi.setAccessToken(data.body["access_token"]);
+  },
+  function (err) {
+    console.log("Something went wrong when retrieving an access token", err);
+  }
+);
 
 const RATE_LIMIT_DELAY = 60000; // 1 minute delay
 
@@ -80,6 +98,20 @@ const searchYouTubeVideo = async (query) => {
     return response.data.items[0];
   } catch (error) {
     console.error("Error searching YouTube API:", error);
+    throw error;
+  }
+};
+
+// Function to search for a Spotify track
+const searchSpotifyTrack = async (query) => {
+  try {
+    const response = await spotifyApi.searchTracks(query, { limit: 1 });
+    if (response.body.tracks.items.length === 0) {
+      throw new Error("No track found for the query.");
+    }
+    return response.body.tracks.items[0];
+  } catch (error) {
+    console.error("Error searching Spotify API:", error);
     throw error;
   }
 };
@@ -148,11 +180,13 @@ const fetchValidTrack = async () => {
         const query = `${trackDetails.title} ${trackDetails.artists_sort}`;
 
         const video = await searchYouTubeVideo(query);
+        const spotifyTrack = await searchSpotifyTrack(query);
 
         if (
           trackDetails.images &&
           trackDetails.images.length > 0 &&
-          video.id.videoId
+          video.id.videoId &&
+          spotifyTrack.external_urls.spotify
         ) {
           const description = await generateDescription(
             trackDetails.artists_sort,
@@ -167,6 +201,7 @@ const fetchValidTrack = async () => {
             albumArtBlurred: trackDetails.images[0].uri,
             videoId: video.id.videoId,
             discogsUrl: trackDetails.uri, // Using the correct URL
+            spotifyUrl: spotifyTrack.external_urls.spotify, // Spotify URL
             description: description,
           };
         }

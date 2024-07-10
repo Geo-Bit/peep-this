@@ -56,7 +56,6 @@ html, body, #root {
 }
 
 .album-art {
-  max-width: 400px;
   width: 100%;
   height: auto;
   margin-bottom: 20px;
