@@ -148,11 +148,17 @@ app.get("/api/getSongOfTheDay", async (req, res) => {
       trackDetails.title
     );
 
+    // Fetch larger album art if available
+    const albumArt = trackDetails.images
+      ? trackDetails.images.find((img) => img.type === "primary")
+      : null;
+    const albumArtUrl = albumArt ? albumArt.uri : null;
+
     const result = {
       title: trackDetails.title,
       artist: trackDetails.artists_sort,
-      albumArt: trackDetails.images ? trackDetails.images[0].uri : null,
-      albumArtBlurred: trackDetails.images ? trackDetails.images[0].uri : null,
+      albumArt: albumArtUrl,
+      albumArtBlurred: albumArtUrl,
       videoId: video.id.videoId,
       resourceUrl: trackDetails.resource_url,
       description: description,

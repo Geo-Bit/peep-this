@@ -50,13 +50,15 @@ html, body, #root {
 
 .album-art-container {
   display: flex;
-  align-items: center;
+  align-items: flex-start; /* Align the top of navigation with the top of album art */
   justify-content: center;
+  gap: 20px; /* Space between album art and navigation */
 }
 
 .album-art {
   max-width: 400px;
-  max-height: 400px;
+  width: 100%;
+  height: auto;
   margin-bottom: 20px;
 }
 
@@ -65,7 +67,6 @@ html, body, #root {
   flex-direction: column;
   align-items: flex-start;
   gap: 10px;
-  margin-left: 20px; /* Add some spacing between the album art and the navigation */
 }
 
 .nav-button {
@@ -95,4 +96,20 @@ html, body, #root {
 
 .info-box h3 {
   margin-top: 0;
+}
+
+@media (max-width: 768px) {
+  .album-art-container {
+    flex-direction: column;
+    align-items: center;
+  }
+  .navigation {
+    align-items: center;
+  }
+  .album-art {
+    max-width: 300px;
+  }
+  .info-box {
+    max-width: 90%;
+  }
 }
