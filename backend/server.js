@@ -3,10 +3,13 @@ const axios = require("axios");
 const path = require("path");
 const { google } = require("googleapis");
 const OpenAI = require("openai");
+const cors = require("cors");
 require("dotenv").config();
 
 const app = express();
 const PORT = process.env.PORT || 4000;
+
+app.use(cors());
 
 const DISCOGS_API_URL = "https://api.discogs.com/";
 const {

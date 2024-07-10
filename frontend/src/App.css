@@ -19,26 +19,6 @@ html, body, #root {
   margin-bottom: 1em;
 }
 
-.controls {
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-}
-
-.control-button {
-  background: rgba(0, 0, 0, 0.5);
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  margin: 0 0.5rem;
-  cursor: pointer;
-  transition: background 0.3s ease;
-}
-
-.control-button:hover {
-  background: rgba(0, 0, 0, 0.7);
-}
-
 .background {
   position: absolute;
   top: 0;
@@ -60,11 +40,40 @@ html, body, #root {
   text-align: center;
 }
 
-.video-container {
+.main-content {
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+}
+
+.album-art {
+  max-width: 400px;
+  max-height: 400px;
+  margin-bottom: 20px;
+}
+
+.navigation {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.nav-button {
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  text-decoration: none;
+  text-align: center;
+}
+
+.nav-button:hover {
+  background: rgba(0, 0, 0, 0.7);
 }
 
 .info-box {
