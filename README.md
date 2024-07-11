@@ -53,7 +53,6 @@ To run this application on your local machine, follow these steps:
 
 ## Future Enhancements
 
-- **Integration with Spotify**: Add functionality to fetch and link tracks from Spotify.
 - **Enhanced Track Filtering**: Improve the algorithm to find even more hidden gems with better filtering criteria.
 
 ## Contributing
